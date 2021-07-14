@@ -3,8 +3,11 @@
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
     </Found>
     <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p>Sorry, there's nothing at this address.</p>
+        <LayoutView  Layout="@typeof(MainLayout)">
+            <div>
+                <label>迷路了吗？</label>
+                <a href="/">回去吧！</a>
+            </div>
         </LayoutView>
     </NotFound>
 </Router>

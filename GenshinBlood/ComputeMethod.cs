@@ -53,13 +53,13 @@ namespace GenshinBlood
                 throw new ArgumentOutOfRangeException();
             }
 
-            // 样本空间概率密度
+            // 鏍锋湰绌洪棿姒傜巼瀵嗗害
             var curve = new double[90];
-            // 临时概率密度
+            // 涓存椂姒傜巼瀵嗗害
             var tmp = new double[90 * star5Count];
-            // 概率密度
+            // 姒傜巼瀵嗗害
             var den = new double[90 * star5Count];
-            // 分布函数
+            // 鍒嗗竷鍑芥暟
             var dis = new double[90 * star5Count];
 
             curve[0] = 0.006;

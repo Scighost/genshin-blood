@@ -25,9 +25,6 @@ jobs:
     - name: Publish Blazor Project
       run: dotnet publish -c Release -o release --nologo
       
-    - name: Create 404 File
-      run: cp release/wwwroot/index.html release/wwwroot/404.html
-      
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
