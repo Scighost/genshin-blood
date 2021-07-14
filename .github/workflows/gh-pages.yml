@@ -31,3 +31,4 @@ jobs:
         token: ${{ secrets.GITHUBTOKEN }}
         branch: gh-pages
         folder: release/wwwroot
+
