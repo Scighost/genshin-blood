@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GenshinBlood
 {
-    public class Compute
+    public class Program
     {
         public static async Task Main(string[] args)
         {
