@@ -1,0 +1,36 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore Dependencies
+      run: dotnet restore
+      
+    - name: Publish Blazor Project
+      run: dotnet publish -c Release -o release --nologo
+      
+    - name: Create 404 File
+      run: cp release/wwwroot/index.html release/wwwroot/404.html
+      
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        token: ${{ secrets.GITHUBTOKEN }}
+        branch: gh-pages
+        folder: release/wwwroot
