@@ -14,21 +14,42 @@ namespace GenshinBlood
 
         public double AverageRatio => (double)Star5Count / TotalCount;
 
+        public double RatioRankShow
+        {
+            get
+            {
+                if (Star5Count == 0)
+                {
+                    return double.NaN;
+                }
+                else
+                {
+                    return RatioRank;
+                }
+            }
+        }
+
         public string Assessment
         {
             get
             {
-                return RatioRank switch
+                if (Star5Count == 0)
                 {
-                    < 0.001349898031630 => "欧皇",
-                    < 0.022750131948179 => "很欧",
-                    < 0.158655253931457 => "较欧",
-                    < 0.841344746068543 => "正常",
-                    < 0.977249868051821 => "较非",
-                    < 0.998650101968370 => "很非",
-                    _ => "非酋"
-                };
-
+                    return "NaN";
+                }
+                else
+                {
+                    return RatioRank switch
+                    {
+                        < 0.001349898031630 => "欧皇",
+                        < 0.022750131948179 => "很欧",
+                        < 0.158655253931457 => "较欧",
+                        < 0.841344746068543 => "正常",
+                        < 0.977249868051821 => "较非",
+                        < 0.998650101968370 => "很非",
+                        _ => "非酋"
+                    };
+                }
             }
         }
     }
