@@ -10,7 +10,7 @@
 
 <div>
     <h5>输入数据</h5>
-    <label style="color:red">注意：总数统计到最后一个5星</label>
+    <label style="color:red">注意：总数统计到最后一个5星，总抽数减去已垫抽数</label>
 </div>
 
 <div>
@@ -217,11 +217,11 @@ private async Task ComputeBlood()
     try
     {
         if (characterCount < 0 || characterStar5Count < 0
-            || characterCount > 90 * (characterStar5Count + 1)
+            || characterCount > 90 * characterStar5Count
             || weaponCount < 0 || weaponStar5Count < 0
-            || weaponCount > 80 * (weaponStar5Count + 1)
+            || weaponCount > 80 * weaponStar5Count
             || permanentCount < 0 || permanentStar5Count < 0
-            || permanentCount > 90 * (permanentStar5Count + 1))
+            || permanentCount > 90 * permanentStar5Count)
         {
             throw new Exception("请填写正确的数字");
         }
