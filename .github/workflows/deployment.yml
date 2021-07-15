@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages and Vercel
 
 on:
   push:
@@ -32,3 +32,13 @@ jobs:
         branch: gh-pages
         folder: release/wwwroot
 
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v20.0.0
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-args: '--prod'
+        github-comment: false
+        working-directory: release/wwwroot
+        vercel-project-id: ${{ secrets.VERCEL_PROJECTID }}
+        vercel-org-id: ${{ secrets.VERCEL_ORGID }}
+        vercel-project-name: 'genshin-blood'
