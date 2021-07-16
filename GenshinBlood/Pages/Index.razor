@@ -64,6 +64,7 @@
 @if (isError)
 {
     <Alert Message="@errorMessage" Type="@AlertType.Error" />
+    <br />
 }
 
 
@@ -155,203 +156,236 @@
                 <Line @ref="chart3" Data="permanentResult.PlotData" Config="lineConfig" />
             </details>
         </div>
+        <hr />
         <br />
     </div>
     <br />
 }
 
+<div>
+    <label style="font-weight:bold">欧气排名与血统评价</label>
+    <p>
+        欧气排名指的是你的平均抽数在通过理论计算得到的概率分布中所处的位置，这个值与5星数有关，在5星数不同的情况下即使相同的平均抽数欧气排名也会不同。
+        <br />
+        血统评价是基于正态分布3σ准则对欧气排名进行分类，标准如下：
+    </p>
+    <p>
+        1σ之内，16.866%~84.134%，正常
+        <br />
+        2σ之内，2.275%~16.866%，84.134%~97.725%，较欧/较非
+        <br />
+        3σ之内，0.135%~2.275%，97.725%~99.865%，很欧/很非
+        <br />
+        3σ之外，0%~0.135%，99.865%~100%，欧皇/非酋
+    </p>
+    <p>这是一个统计层面的评价，每个人心中的标准不一样，欧气排名更有PVP意义 ：）</p>
+    <br />
 
+    <label style="font-weight:bold">归一化概率密度</label>
+    <p>
+        归一化概率密度是指把概率密度等比例放大至最大值为1，数值上还是以概率密度那条曲线为准。
+        <br />
+        双y轴的曲线图没做出来，只能用这种方法凑合一下，不然接近x轴的一条曲线根本看不出来分布情况。
+    </p>
+    <br />
+
+    <label style="font-weight:bold">我很欧但是小保底歪了</label>
+    <p>接下来的更新计划中将加入小保底歪的情况，可以持续关注。</p>
+</div>
 
 
 @code {
 
-private int characterStar5Count;
-private int characterCount;
-private int weaponStar5Count;
-private int weaponCount;
-private int permanentStar5Count;
-private int permanentCount;
+    private int characterStar5Count;
+    private int characterCount;
+    private int weaponStar5Count;
+    private int weaponCount;
+    private int permanentStar5Count;
+    private int permanentCount;
 
-private bool isComputing;
-private bool isComputeFinished;
-private double progressPercent;
-private bool isError;
-private string errorMessage;
+    private bool isComputing;
+    private bool isComputeFinished;
+    private double progressPercent;
+    private bool isError;
+    private string errorMessage;
 
-IChartComponent chart1;
-IChartComponent chart2;
-IChartComponent chart3;
+    IChartComponent chart1;
+    IChartComponent chart2;
+    IChartComponent chart3;
 
-private BloodResult characterResult;
-private BloodResult weaponResult;
-private BloodResult permanentResult;
+    private BloodResult characterResult;
+    private BloodResult weaponResult;
+    private BloodResult permanentResult;
 
-private LineConfig lineConfig = new()
-{
-    ForceFit = true,
-    Padding = "auto",
-    XField = "x",
-    YField = "y",
-    SeriesField = "type",
-    Smooth = true,
-    XAxis = new ValueCatTimeAxis
+    private LineConfig lineConfig = new()
     {
-        Visible = true,
-        Title = new BaseAxisTitle
+        ForceFit = true,
+        Padding = "auto",
+        XField = "x",
+        YField = "y",
+        SeriesField = "type",
+        Smooth = true,
+        XAxis = new ValueCatTimeAxis
         {
             Visible = true,
-            Text = "平均每个5星所需的抽卡次数"
-        }
-    },
-    YAxis = new ValueAxis
-    {
-        Visible = true,
-        Min = 0,
-        Max = 1
-    },
-};
-
-
-private async Task ComputeBlood()
-{
-    try
-    {
-        if (characterCount < 0 || characterStar5Count < 0
-            || characterCount > 90 * characterStar5Count
-            || weaponCount < 0 || weaponStar5Count < 0
-            || weaponCount > 80 * weaponStar5Count
-            || permanentCount < 0 || permanentStar5Count < 0
-            || permanentCount > 90 * permanentStar5Count)
+            Title = new BaseAxisTitle
+            {
+                Visible = true,
+                Text = "平均每个5星所需的抽卡次数"
+            }
+        },
+        YAxis = new ValueAxis
         {
-            throw new Exception("请填写正确的数字");
-        }
-
-        isError = false;
-        isComputing = true;
-        isComputeFinished = false;
-        StateHasChanged();
-        await Task.Delay(10);
-
-        var total = characterStar5Count + weaponStar5Count + permanentStar5Count;
-        characterResult = await GetBloodResult(0, characterStar5Count, characterCount, total);
-        weaponResult = await GetBloodResult(1, weaponStar5Count, weaponCount, total);
-        permanentResult = await GetBloodResult(0, permanentStar5Count, permanentCount, total);
-
-        isComputing = false;
-        isComputeFinished = true;
-        StateHasChanged();
-        progressPercent = 0;
-        await Task.Delay(10);
-
-        await chart1.ChangeData(characterResult.PlotData);
-        await chart2.ChangeData(weaponResult.PlotData);
-        await chart3.ChangeData(permanentResult.PlotData);
-    }
-    catch (Exception ex)
-    {
-        errorMessage = ex.Message;
-        isError = true;
-        isComputing = false;
-        isComputeFinished = false;
-        progressPercent = 0;
-    }
-
-}
-
-
-private async Task<BloodResult> GetBloodResult(int wishType, int star5Count, int wishTypeCount, int totalCount)
-{
-    var result = new BloodResult
-    {
-        TotalCount = wishTypeCount,
-        Star5Count = star5Count
+            Visible = true,
+            Min = 0,
+            Max = 1
+        },
     };
-    if (star5Count == 0)
-    {
-        star5Count = 1;
-    }
-    int n = 0;
-    if (wishType == 0)
-    {
-        n = 90;
-    }
-    else
-    {
-        n = 80;
-    }
-    double[] den = new double[n * star5Count];
-    List<PointEx> list = new(n * star5Count);
 
-    for (int i = 0; i < star5Count; i++)
-    {
-        ComputeMethod.IterateDensity(wishType, ref den, i + 1);
-        progressPercent += (double)60 / totalCount;
-        StateHasChanged();
-        await Task.Delay(10);
-    }
 
-    var dis = ComputeMethod.GetDistribution(den);
-
-    for (int i = 0; i < den.Length; i++)
+    private async Task ComputeBlood()
     {
-        list.Add(new PointEx
+        try
         {
-            X = ((double)(i + 1) / star5Count).ToString("F3"),
-            Y = dis[i],
-            Type = "分布函数"
-        });
-        if ((i + 1) % n == 0)
+            if (characterCount < 0 || characterStar5Count < 0
+                || characterCount > 90 * characterStar5Count
+                || characterStar5Count > characterCount
+                || weaponCount < 0 || weaponStar5Count < 0
+                || weaponCount > 80 * weaponStar5Count
+                || weaponStar5Count > weaponCount
+                || permanentCount < 0 || permanentStar5Count < 0
+                || permanentCount > 90 * permanentStar5Count
+                || permanentStar5Count > permanentCount)
+            {
+                throw new Exception("请填写正确的数字");
+            }
+
+            isError = false;
+            isComputing = true;
+            isComputeFinished = false;
+            StateHasChanged();
+            await Task.Delay(10);
+
+            var total = characterStar5Count + weaponStar5Count + permanentStar5Count;
+            characterResult = await GetBloodResult(0, characterStar5Count, characterCount, total);
+            weaponResult = await GetBloodResult(1, weaponStar5Count, weaponCount, total);
+            permanentResult = await GetBloodResult(0, permanentStar5Count, permanentCount, total);
+
+            isComputing = false;
+            isComputeFinished = true;
+            StateHasChanged();
+            progressPercent = 0;
+            await Task.Delay(10);
+
+            await chart1.ChangeData(characterResult.PlotData);
+            await chart2.ChangeData(weaponResult.PlotData);
+            await chart3.ChangeData(permanentResult.PlotData);
+        }
+        catch (Exception ex)
         {
-            progressPercent += (double)40 / totalCount;
+            errorMessage = ex.Message;
+            isError = true;
+            isComputing = false;
+            isComputeFinished = false;
+            progressPercent = 0;
+        }
+
+    }
+
+
+    private async Task<BloodResult> GetBloodResult(int wishType, int star5Count, int wishTypeCount, int totalCount)
+    {
+        var result = new BloodResult
+        {
+            TotalCount = wishTypeCount,
+            Star5Count = star5Count
+        };
+        if (star5Count == 0)
+        {
+            star5Count = 1;
+        }
+        int n = 0;
+        if (wishType == 0)
+        {
+            n = 90;
+        }
+        else
+        {
+            n = 80;
+        }
+        double[] den = new double[n * star5Count];
+        List<PointEx> list = new(n * star5Count);
+
+        for (int i = 0; i < star5Count; i++)
+        {
+            ComputeMethod.IterateDensity(wishType, ref den, i + 1);
+            progressPercent += (double)60 / totalCount;
             StateHasChanged();
             await Task.Delay(10);
         }
-    }
 
+        var dis = ComputeMethod.GetDistribution(den);
 
-    for (int i = 0; i < den.Length; i++)
-    {
-        list.Add(new PointEx
+        for (int i = 0; i < den.Length; i++)
         {
-            X = ((double)(i + 1) / star5Count).ToString("F3"),
-            Y = den[i],
-            Type = "概率密度"
-        });
-        if ((i + 1) % n == 0)
-        {
-            progressPercent += (double)40 / totalCount;
-            StateHasChanged();
-            await Task.Delay(10);
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = dis[i],
+                Type = "分布函数"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
         }
-    }
 
 
-    var max = den.Max();
-    for (int i = 0; i < den.Length; i++)
-    {
-        list.Add(new PointEx
+        for (int i = 0; i < den.Length; i++)
         {
-            X = ((double)(i + 1) / star5Count).ToString("F3"),
-            Y = den[i] / max,
-            Type = "归一化概率密度"
-        });
-        if ((i + 1) % n == 0)
-        {
-            progressPercent += (double)40 / totalCount;
-            StateHasChanged();
-            await Task.Delay(10);
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i],
+                Type = "概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
         }
-    }
 
-    result.PlotData = list.ToArray();
-    if (wishTypeCount == 0)
-    {
-        result.RatioRank = dis[0];
+
+        var max = den.Max();
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i] / max,
+                Type = "归一化概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+        result.PlotData = list.ToArray();
+        if (wishTypeCount == 0)
+        {
+            result.RatioRank = dis[0];
+        }
+        else
+        {
+            result.RatioRank = dis[wishTypeCount - 1];
+        }
+        return result;
     }
-    else
-    {
-        result.RatioRank = dis[wishTypeCount - 1];
-    }
-    return result;
-}
 }
