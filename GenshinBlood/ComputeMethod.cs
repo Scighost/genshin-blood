@@ -6,14 +6,20 @@ namespace GenshinBlood
     internal static class ComputeMethod
     {
 
-        private static double[] CharacterInitDensity;
+        private static readonly double[] InitCharacterDensity;
 
-        private static double[] WeaponInitDensity;
+        private static readonly double[] InitWeaponDensity;
+
+        private static readonly double[] InitCharacterDensityWithUp;
+
+        private static readonly double[] InitWeaponDensityWithUp;
 
         static ComputeMethod()
         {
-            CharacterInitDensity = GetInitCharacterDensity();
-            WeaponInitDensity = GetInitWeaponDensity();
+            InitCharacterDensity = GetInitCharacterDensity();
+            InitWeaponDensity = GetInitWeaponDensity();
+            InitCharacterDensityWithUp = GetInitCharacterDensityWithUp();
+            InitCharacterDensityWithUp = GetInitWeaponDensityWithUp();
         }
 
         private static double GetCharacterProbability(int n)
@@ -160,12 +166,44 @@ namespace GenshinBlood
             return result;
         }
 
+        private static double[] GetInitCharacterDensityWithUp()
+        {
+            var tmp = new double[180];
+            InitCharacterDensity.CopyTo(tmp, 0);
+            var result = new double[180];
+            for (int i = 1; i <= result.Length; i++)
+            {
+                result[i - 1] += 0.5 * tmp[i - 1];
+                for (int j = 1; j <= 90 && i - j > 0; j++)
+                {
+                    result[i - 1] += 0.5 * tmp[i - j - 1] * InitCharacterDensity[j - 1];
+                }
+            }
+            return result;
+        }
+
+        private static double[] GetInitWeaponDensityWithUp()
+        {
+            var tmp = new double[160];
+            InitCharacterDensity.CopyTo(tmp, 0);
+            var result = new double[160];
+            for (int i = 1; i <= result.Length; i++)
+            {
+                result[i - 1] += 0.75 * tmp[i - 1];
+                for (int j = 1; j <= 80 && i - j > 0; j++)
+                {
+                    result[i - 1] += 0.25 * tmp[i - j - 1] * InitCharacterDensity[j - 1];
+                }
+            }
+            return result;
+        }
+
 
         public static void IterateCharacterDensity(ref double[] density, int n)
         {
             if (n == 1)
             {
-                CharacterInitDensity.CopyTo(density, 0);
+                InitCharacterDensity.CopyTo(density, 0);
                 return;
             }
             var tmp = new double[density.Length];
@@ -175,7 +213,7 @@ namespace GenshinBlood
             {
                 for (int j = 1; j <= 90 && i - j > 0; j++)
                 {
-                    density[i - 1] += tmp[i - j - 1] * CharacterInitDensity[j - 1];
+                    density[i - 1] += tmp[i - j - 1] * InitCharacterDensity[j - 1];
                 }
             }
         }
@@ -185,7 +223,7 @@ namespace GenshinBlood
         {
             if (n <= 1)
             {
-                WeaponInitDensity.CopyTo(density, 0);
+                InitWeaponDensity.CopyTo(density, 0);
                 return;
             }
             var tmp = new double[density.Length];
@@ -195,12 +233,10 @@ namespace GenshinBlood
             {
                 for (int j = 1; j <= 80 && i - j > 0; j++)
                 {
-                    density[i - 1] += tmp[i - j - 1] * WeaponInitDensity[j - 1];
+                    density[i - 1] += tmp[i - j - 1] * InitWeaponDensity[j - 1];
                 }
             }
         }
-
-
 
 
         public static void IterateDensity(int wishType, ref double[] density, int n)
@@ -212,6 +248,46 @@ namespace GenshinBlood
             else
             {
                 IterateWeaponDensity(ref density, n);
+            }
+        }
+
+
+        public static void IterateCharacterDensityWithUp(ref double[] density, int n)
+        {
+            if (n == 1)
+            {
+                InitCharacterDensityWithUp.CopyTo(density, 0);
+                return;
+            }
+            var tmp = new double[density.Length];
+            density.CopyTo(tmp, 0);
+            Array.Clear(density, 0, density.Length);
+            for (int i = 1; i <= 180 * n; i++)
+            {
+                for (int j = 1; j <= 180 && i - j > 0; j++)
+                {
+                    density[i - 1] += tmp[i - j - 1] * InitCharacterDensityWithUp[j - 1];
+                }
+            }
+        }
+
+
+        public static void IterateWeaponDensityWithUp(ref double[] density, int n)
+        {
+            if (n <= 1)
+            {
+                InitWeaponDensityWithUp.CopyTo(density, 0);
+                return;
+            }
+            var tmp = new double[density.Length];
+            density.CopyTo(tmp, 0);
+            Array.Clear(density, 0, density.Length);
+            for (int i = 1; i <= 160 * n; i++)
+            {
+                for (int j = 1; j <= 160 && i - j > 0; j++)
+                {
+                    density[i - 1] += tmp[i - j - 1] * InitWeaponDensity[j - 1];
+                }
             }
         }
 
