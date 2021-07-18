@@ -19,7 +19,7 @@ namespace GenshinBlood
             InitCharacterDensity = GetInitCharacterDensity();
             InitWeaponDensity = GetInitWeaponDensity();
             InitCharacterDensityWithUp = GetInitCharacterDensityWithUp();
-            InitCharacterDensityWithUp = GetInitWeaponDensityWithUp();
+            InitWeaponDensityWithUp = GetInitWeaponDensityWithUp();
         }
 
         private static double GetCharacterProbability(int n)
@@ -192,7 +192,7 @@ namespace GenshinBlood
                 result[i - 1] += 0.75 * tmp[i - 1];
                 for (int j = 1; j <= 80 && i - j > 0; j++)
                 {
-                    result[i - 1] += 0.25 * tmp[i - j - 1] * InitCharacterDensity[j - 1];
+                    result[i - 1] += 0.25 * tmp[i - j - 1] * InitWeaponDensity[j - 1];
                 }
             }
             return result;
@@ -286,8 +286,20 @@ namespace GenshinBlood
             {
                 for (int j = 1; j <= 160 && i - j > 0; j++)
                 {
-                    density[i - 1] += tmp[i - j - 1] * InitWeaponDensity[j - 1];
+                    density[i - 1] += tmp[i - j - 1] * InitWeaponDensityWithUp[j - 1];
                 }
+            }
+        }
+
+        public static void IterateDensityWithUp(int wishType, ref double[] density, int n)
+        {
+            if (wishType == 0)
+            {
+                IterateCharacterDensityWithUp(ref density, n);
+            }
+            else
+            {
+                IterateWeaponDensityWithUp(ref density, n);
             }
         }
 

@@ -3,428 +3,659 @@
 
 <h3>旅行者血统检测</h3>
 <div>
-	<label>开源项目地址</label>
-	<a href="https://github.com/Scighost/genshin-blood" target="_blank">Github@Scighost</a>
+    <label>开源项目地址</label>
+    <a href="https://github.com/Scighost/genshin-blood" target="_blank">Github@Scighost</a>
 </div>
 <br />
 
 <div>
-	<h5>输入数据</h5>
-	<label style="color:red">注意：总数统计到最后一个5星，即需要减去已垫抽数</label>
+    <h5>输入数据</h5>
+    <p style="color:red">
+        注意：总数统计到最后一个5星，即需要减去已垫抽数。
+        <br />
+        当考虑Up时，如果小保底歪了则不计入Up5星数；总数除了减去已垫抽数，如果最后一个5星是小保底并且歪了，还需减去该5星的抽数。
+    </p>
 </div>
 
 <div>
-	<div>角色祈愿</div>
-	<div>
-		<label>5星数：</label>
-		<AntDesign.InputNumber Min="0" @bind-Value="CharacterStar5Count" />
-		<label>总数：</label>
-		<AntDesign.InputNumber @bind-Value="characterCount" />
-		<label>@characterRange</label>
-	</div>
-</div>
-<br />
-
-<div>
-	<div>武器祈愿</div>
-	<div>
-		<label>5星数：</label>
-		<AntDesign.InputNumber Min="0" @bind-Value="WeaponStar5Count" />
-		<label>总数：</label>
-		<AntDesign.InputNumber @bind-Value="weaponCount" />
-		<label>@weaponRange</label>
-	</div>
+    <div>角色祈愿(任意5星)</div>
+    <div>
+        <label>5星数：</label>
+        <AntDesign.InputNumber Min="0" @bind-Value="CharacterStar5Count" />
+        <label>总数：</label>
+        <AntDesign.InputNumber @bind-Value="characterCount" />
+        <label>@characterRange</label>
+    </div>
 </div>
 <br />
 
 <div>
-	<div>常驻祈愿</div>
-	<div>
-		<label>5星数：</label>
-		<AntDesign.InputNumber change Min="0" @bind-Value="PermanentStar5Count" />
-		<label>总数：</label>
-		<AntDesign.InputNumber @bind-Value="permanentCount" />
-		<label>@permanentRange</label>
-	</div>
+    <div>武器祈愿(任意5星)</div>
+    <div>
+        <label>5星数：</label>
+        <AntDesign.InputNumber Min="0" @bind-Value="WeaponStar5Count" />
+        <label>总数：</label>
+        <AntDesign.InputNumber @bind-Value="weaponCount" />
+        <label>@weaponRange</label>
+    </div>
+</div>
+<br />
+
+<div>
+    <div>常驻祈愿(任意5星)</div>
+    <div>
+        <label>5星数：</label>
+        <AntDesign.InputNumber change Min="0" @bind-Value="PermanentStar5Count" />
+        <label>总数：</label>
+        <AntDesign.InputNumber @bind-Value="permanentCount" />
+        <label>@permanentRange</label>
+    </div>
+</div>
+<br />
+
+<div>
+    <div>角色祈愿(Up5星)</div>
+    <div>
+        <label>Up5星数：</label>
+        <AntDesign.InputNumber Min="0" @bind-Value="CharacterStar5CountWithUp" />
+        <label>总数：</label>
+        <AntDesign.InputNumber @bind-Value="characterCountWithUp" />
+        <label>@characterRangeWithUp</label>
+    </div>
+</div>
+<br />
+
+<div>
+    <div>武器祈愿(Up5星)</div>
+    <div>
+        <label>Up5星数：</label>
+        <AntDesign.InputNumber Min="0" @bind-Value="WeaponStar5CountWithUp" />
+        <label>总数：</label>
+        <AntDesign.InputNumber @bind-Value="weaponCountWithUp" />
+        <label>@weaponRangeWithUp</label>
+    </div>
 </div>
 <br />
 
 
 
 <div>
-	<Button Loading="isComputing" @onclick="ComputeBlood">计算</Button>
+    <Button Loading="isComputing" @onclick="ComputeBlood">计算</Button>
 </div>
 
 @if (isComputing)
 {
-	<div style="max-width: 600px">
-		<AntDesign.Progress ShowInfo="false" Percent="progressPercent" />
-	</div>
+    <div style="max-width: 600px">
+        <AntDesign.Progress ShowInfo="false" Percent="progressPercent" />
+    </div>
 }
 
 <div style="max-width: 600px;">
-	<hr />
+    <hr />
 </div>
 
 @if (isError)
 {
-	<Alert Message="@errorMessage" Type="@AlertType.Error" />
-	<br />
+    <Alert Message="@errorMessage" Type="@AlertType.Error" />
+    <br />
 }
 
 
 @if (isComputeFinished)
 {
-	<div style="max-width: 600px">
-		<div>
-			<div>
-				<h5>角色祈愿</h5>
-			</div>
-			<div style="display: inline-block; margin-right: 24px;">
-				<Statistic Title="总数" Value="@(characterResult.TotalCount)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星数" Value="@(characterResult.Star5Count)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均次数" Value="@(characterResult.AverageCount.ToString("F3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均概率" Value="@(characterResult.AverageRatio.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="欧气排名" Value="@(characterResult.RatioRankShow.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="血统评价" Value="@(characterResult.Assessment)" />
-			</div>
-			<details open>
-				<summary>概率密度与分布函数</summary>
-				<Line @ref="chart1" Data="characterResult.PlotData" Config="lineConfig" />
-			</details>
-		</div>
-		<hr />
+    <div style="max-width: 600px">
+        <div>
+            <details open>
+                <summary style="font-size:large">角色祈愿(任意5星)</summary>
+                <div style="display: inline-block; margin-right: 24px;">
+                    <Statistic Title="总数" Value="@(characterResult.TotalCount)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星数" Value="@(characterResult.Star5Count)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均次数" Value="@(characterResult.AverageCount.ToString("F3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均概率" Value="@(characterResult.AverageRatio.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="欧气排名" Value="@(characterResult.RatioRankShow.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="血统评价" Value="@(characterResult.Assessment)" />
+                </div>
+                <details>
+                    <summary>概率分布图</summary>
+                    <Line @ref="chart1" Data="characterResult.PlotData" Config="lineConfig" />
+                </details>
+            </details>
+        </div>
+        <hr />
 
-		<div>
-			<div>
-				<h5>武器祈愿</h5>
-			</div>
-			<div style="display: inline-block; margin-right: 24px ">
-				<Statistic Title="总数" Value="@(weaponResult.TotalCount)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星数" Value="@(weaponResult.Star5Count)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均次数" Value="@(weaponResult.AverageCount.ToString("F3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均概率" Value="@(weaponResult.AverageRatio.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="欧气排名" Value="@(weaponResult.RatioRankShow.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="血统评价" Value="@(weaponResult.Assessment)" />
-			</div>
-			<details style="max-width: 600px" open>
-				<summary>概率密度与分布函数</summary>
-				<Line @ref="chart2" Data="weaponResult.PlotData" Config="lineConfig" />
-			</details>
-		</div>
-		<hr />
+        <div>
+            <details open>
+                <summary style="font-size:large">武器祈愿(任意5星)</summary>
+                <div style="display: inline-block; margin-right: 24px ">
+                    <Statistic Title="总数" Value="@(weaponResult.TotalCount)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星数" Value="@(weaponResult.Star5Count)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均次数" Value="@(weaponResult.AverageCount.ToString("F3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均概率" Value="@(weaponResult.AverageRatio.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="欧气排名" Value="@(weaponResult.RatioRankShow.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="血统评价" Value="@(weaponResult.Assessment)" />
+                </div>
+                <details style="max-width: 600px">
+                    <summary>概率分布图</summary>
+                    <Line @ref="chart2" Data="weaponResult.PlotData" Config="lineConfig" />
+                </details>
+            </details>
+        </div>
+        <hr />
 
-		<div>
-			<div>
-				<h5>常驻祈愿</h5>
-			</div>
-			<div style="display: inline-block; margin-right: 24px ">
-				<Statistic Title="总数" Value="@(permanentResult.TotalCount)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星数" Value="@(permanentResult.Star5Count)" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均次数" Value="@(permanentResult.AverageCount.ToString("F3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="5星平均概率" Value="@(permanentResult.AverageRatio.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="欧气排名" Value="@(permanentResult.RatioRankShow.ToString("P3"))" />
-			</div>
-			<div style="display: inline-block; margin-right: 24px; ">
-				<Statistic Title="血统评价" Value="@(permanentResult.Assessment)" />
-			</div>
-			<details style="max-width: 600px" open>
-				<summary>概率密度与分布函数</summary>
-				<Line @ref="chart3" Data="permanentResult.PlotData" Config="lineConfig" />
-			</details>
-		</div>
-		<hr />
-		<br />
-	</div>
-	<br />
+        <div>
+            <details open>
+                <summary style="font-size:large">常驻祈愿(任意5星)</summary>
+                <div style="display: inline-block; margin-right: 24px ">
+                    <Statistic Title="总数" Value="@(permanentResult.TotalCount)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星数" Value="@(permanentResult.Star5Count)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均次数" Value="@(permanentResult.AverageCount.ToString("F3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均概率" Value="@(permanentResult.AverageRatio.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="欧气排名" Value="@(permanentResult.RatioRankShow.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="血统评价" Value="@(permanentResult.Assessment)" />
+                </div>
+                <details style="max-width: 600px">
+                    <summary>概率分布图</summary>
+                    <Line @ref="chart3" Data="permanentResult.PlotData" Config="lineConfig" />
+                </details>
+            </details>
+        </div>
+        <hr />
+
+        <div>
+            <details open>
+                <summary style="font-size:large">角色祈愿(Up5星)</summary>
+                <div style="display: inline-block; margin-right: 24px;">
+                    <Statistic Title="总数" Value="@(characterResultWithUp.TotalCount)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星数" Value="@(characterResultWithUp.Star5Count)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均次数" Value="@(characterResultWithUp.AverageCount.ToString("F3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均概率" Value="@(characterResultWithUp.AverageRatio.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="欧气排名" Value="@(characterResultWithUp.RatioRankShow.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="血统评价" Value="@(characterResultWithUp.Assessment)" />
+                </div>
+                <details>
+                    <summary>概率分布图</summary>
+                    <Line @ref="chart4" Data="characterResultWithUp.PlotData" Config="lineConfig" />
+                </details>
+            </details>
+        </div>
+        <hr />
+
+        <div>
+            <details open>
+                <summary style="font-size:large">武器祈愿(Up5星)</summary>
+                <div style="display: inline-block; margin-right: 24px ">
+                    <Statistic Title="总数" Value="@(weaponResultWithUp.TotalCount)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星数" Value="@(weaponResultWithUp.Star5Count)" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均次数" Value="@(weaponResultWithUp.AverageCount.ToString("F3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="5星平均概率" Value="@(weaponResultWithUp.AverageRatio.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="欧气排名" Value="@(weaponResultWithUp.RatioRankShow.ToString("P3"))" />
+                </div>
+                <div style="display: inline-block; margin-right: 24px; ">
+                    <Statistic Title="血统评价" Value="@(weaponResultWithUp.Assessment)" />
+                </div>
+                <details style="max-width: 600px">
+                    <summary>概率分布图</summary>
+                    <Line @ref="chart5" Data="weaponResultWithUp.PlotData" Config="lineConfig" />
+                </details>
+            </details>
+        </div>
+        <hr />
+
+        <br />
+    </div>
 }
 
 <div>
-	<label style="font-weight:bold">欧气排名与血统评价</label>
-	<p>
-		欧气排名指的是你的平均抽数在通过理论计算得到的概率分布中所处的位置，这个值与5星数有关，在5星数不同的情况下即使相同的平均抽数欧气排名也会不同。
-		<br />
-		血统评价是基于正态分布3σ准则对欧气排名进行分类，标准如下：
-	</p>
-	<p>
-		1σ之内，16.866%~84.134%，正常
-		<br />
-		2σ之内，2.275%~16.866%，84.134%~97.725%，较欧/较非
-		<br />
-		3σ之内，0.135%~2.275%，97.725%~99.865%，很欧/很非
-		<br />
-		3σ之外，0%~0.135%，99.865%~100%，欧皇/非酋
-	</p>
-	<p>这是一个统计层面的评价，每个人心中的标准不一样，欧气排名更有PVP意义 ：）</p>
-	<br />
+    <label style="font-weight:bold">武器池双Up怎么计算</label>
+    <p>
+        抽中双Up中任意一个均计入Up5星数。
+        <br />
+        2.0之前的版本武器池没有单个武器的强制保底，很难对指定武器的情况进行概率计算。
+    </p>
+    <br />
 
-	<label style="font-weight:bold">归一化概率密度</label>
-	<p>
-		归一化概率密度是指把概率密度等比例放大至最大值为1，数值上还是以概率密度那条曲线为准。
-		<br />
-		双y轴的曲线图没做出来，只能用这种方法凑合一下，不然接近x轴的一条曲线根本看不出来分布情况。
-	</p>
-	<br />
+    <label style="font-weight:bold">欧气排名与血统评价</label>
+    <p>
+        欧气排名指的是你的平均抽数在通过理论计算得到的概率分布中所处的位置，这个值与5星数有关，在5星数不同的情况下即使相同的平均抽数欧气排名也会不同。
+        <br />
+        血统评价是基于正态分布3σ准则对欧气排名进行分类，标准如下：
+    </p>
+    <p>
+        1σ之内，16.866%~84.134%，正常
+        <br />
+        2σ之内，2.275%~16.866%，84.134%~97.725%，较欧/较非
+        <br />
+        3σ之内，0.135%~2.275%，97.725%~99.865%，很欧/很非
+        <br />
+        3σ之外，0%~0.135%，99.865%~100%，欧皇/非酋
+    </p>
+    <p>这是一个统计层面的评价，每个人心中的标准不一样，欧气排名更有PVP意义 :）</p>
+    <br />
 
-	<label style="font-weight:bold">我很欧但是小保底歪了</label>
-	<p>接下来的更新计划中将加入小保底歪的情况，可以持续关注。</p>
+    <label style="font-weight:bold">归一化概率密度</label>
+    <p>
+        归一化概率密度是指把概率密度等比例放大至最大值为1，数值上还是以概率密度那条曲线为准。
+        <br />
+        双y轴的曲线图没做出来，只能用这种方法凑合一下，不然接近x轴的一条曲线根本看不出来分布情况。
+    </p>
+    <br />
+
+
 </div>
 
 
 @code {
 
-	private int characterStar5Count;
-	private int characterCount;
-	private int weaponStar5Count;
-	private int weaponCount;
-	private int permanentStar5Count;
-	private int permanentCount;
+    #region Input Property
 
-	private string characterRange = " (0~0)";
-	private string weaponRange = " (0~0)";
-	private string permanentRange = " (0~0)";
+    private int characterStar5Count;
+    private int characterCount;
+    private int weaponStar5Count;
+    private int weaponCount;
+    private int permanentStar5Count;
+    private int permanentCount;
+    private int characterStar5CountWithUp;
+    private int characterCountWithUp;
+    private int weaponStar5CountWithUp;
+    private int weaponCountWithUp;
 
-	private int CharacterStar5Count
-	{
-		get => characterStar5Count;
-		set
-		{
-			characterStar5Count = value;
-			characterRange = $" ({value}~{90 * value})";
-		}
-	}
+    private string characterRange = " 0~0";
+    private string weaponRange = " 0~0";
+    private string permanentRange = " 0~0";
+    private string characterRangeWithUp = " 0~0";
+    private string weaponRangeWithUp = " 0~0";
 
-	private int WeaponStar5Count
-	{
-		get => weaponStar5Count;
-		set
-		{
-			weaponStar5Count = value;
-			weaponRange = $" ({value}~{80 * value})";
-		}
-	}
+    private int CharacterStar5Count
+    {
+        get => characterStar5Count;
+        set
+        {
+            characterStar5Count = value;
+            characterRange = $" {value}~{90 * value}";
+        }
+    }
 
-	private int PermanentStar5Count
-	{
-		get => permanentStar5Count;
-		set
-		{
-			permanentStar5Count = value;
-			permanentRange = $" ({value}~{90 * value})";
-		}
-	}
+    private int WeaponStar5Count
+    {
+        get => weaponStar5Count;
+        set
+        {
+            weaponStar5Count = value;
+            weaponRange = $" {value}~{80 * value}";
+        }
+    }
 
-	private bool isComputing;
-	private bool isComputeFinished;
-	private double progressPercent;
-	private bool isError;
-	private string errorMessage;
+    private int PermanentStar5Count
+    {
+        get => permanentStar5Count;
+        set
+        {
+            permanentStar5Count = value;
+            permanentRange = $" {value}~{90 * value}";
+        }
+    }
 
-	IChartComponent chart1;
-	IChartComponent chart2;
-	IChartComponent chart3;
+    private int CharacterStar5CountWithUp
+    {
+        get => characterStar5CountWithUp;
+        set
+        {
+            characterStar5CountWithUp = value;
+            characterRangeWithUp = $" {value}~{180 * value}";
+        }
+    }
 
-	private BloodResult characterResult;
-	private BloodResult weaponResult;
-	private BloodResult permanentResult;
+    private int WeaponStar5CountWithUp
+    {
+        get => weaponStar5CountWithUp;
+        set
+        {
+            weaponStar5CountWithUp = value;
+            weaponRangeWithUp = $" {value}~{160 * value}";
+        }
+    }
 
-	private LineConfig lineConfig = new()
-	{
-		ForceFit = true,
-		Padding = "auto",
-		XField = "x",
-		YField = "y",
-		SeriesField = "type",
-		Smooth = true,
-		XAxis = new ValueCatTimeAxis
-		{
-			Visible = true,
-			Title = new BaseAxisTitle
-			{
-				Visible = true,
-				Text = "平均每个5星所需的抽卡次数"
-			}
-		},
-		YAxis = new ValueAxis
-		{
-			Visible = true,
-			Min = 0,
-			Max = 1
-		},
-	};
+    #endregion
 
+    private bool isComputing;
+    private bool isComputeFinished;
+    private double progressPercent;
+    private bool isError;
+    private string errorMessage;
 
-	private async Task ComputeBlood()
-	{
-		try
-		{
-			if (characterCount < 0 || characterStar5Count < 0
-				|| characterCount > 90 * characterStar5Count
-				|| characterStar5Count > characterCount
-				|| weaponCount < 0 || weaponStar5Count < 0
-				|| weaponCount > 80 * weaponStar5Count
-				|| weaponStar5Count > weaponCount
-				|| permanentCount < 0 || permanentStar5Count < 0
-				|| permanentCount > 90 * permanentStar5Count
-				|| permanentStar5Count > permanentCount)
-			{
-				throw new Exception("请填写正确的数字");
-			}
+    IChartComponent chart1;
+    IChartComponent chart2;
+    IChartComponent chart3;
+    IChartComponent chart4;
+    IChartComponent chart5;
 
-			isError = false;
-			isComputing = true;
-			isComputeFinished = false;
-			StateHasChanged();
-			await Task.Delay(10);
+    private BloodResult characterResult;
+    private BloodResult weaponResult;
+    private BloodResult permanentResult;
+    private BloodResult characterResultWithUp;
+    private BloodResult weaponResultWithUp;
 
-			var total = characterStar5Count + weaponStar5Count + permanentStar5Count;
-			characterResult = await GetBloodResult(0, characterStar5Count, characterCount, total);
-			weaponResult = await GetBloodResult(1, weaponStar5Count, weaponCount, total);
-			permanentResult = await GetBloodResult(0, permanentStar5Count, permanentCount, total);
-
-			isComputing = false;
-			isComputeFinished = true;
-			StateHasChanged();
-			progressPercent = 0;
-			await Task.Delay(10);
-
-			await chart1.ChangeData(characterResult.PlotData);
-			await chart2.ChangeData(weaponResult.PlotData);
-			await chart3.ChangeData(permanentResult.PlotData);
-		}
-		catch (Exception ex)
-		{
-			errorMessage = ex.Message;
-			isError = true;
-			isComputing = false;
-			isComputeFinished = false;
-			progressPercent = 0;
-		}
-
-	}
+    private LineConfig lineConfig = new()
+    {
+        ForceFit = true,
+        Padding = "auto",
+        XField = "x",
+        YField = "y",
+        SeriesField = "type",
+        Smooth = true,
+        XAxis = new ValueCatTimeAxis
+        {
+            Visible = true,
+            Title = new BaseAxisTitle
+            {
+                Visible = true,
+                Text = "平均每个5星所需的抽卡次数"
+            }
+        },
+        YAxis = new ValueAxis
+        {
+            Visible = true,
+            //Min = 0,
+            //Max = 1
+        },
+    };
 
 
-	private async Task<BloodResult> GetBloodResult(int wishType, int star5Count, int wishTypeCount, int totalCount)
-	{
-		var result = new BloodResult
-		{
-			TotalCount = wishTypeCount,
-			Star5Count = star5Count
-		};
-		if (star5Count == 0)
-		{
-			star5Count = 1;
-		}
-		int n = 0;
-		if (wishType == 0)
-		{
-			n = 90;
-		}
-		else
-		{
-			n = 80;
-		}
-		double[] den = new double[n * star5Count];
-		List<PointEx> list = new(n * star5Count);
+    private async Task ComputeBlood()
+    {
+        try
+        {
+            if (characterCount < 0 || characterStar5Count < 0
+                || characterCount > 90 * characterStar5Count
+                || characterStar5Count > characterCount
+                || weaponCount < 0 || weaponStar5Count < 0
+                || weaponCount > 80 * weaponStar5Count
+                || weaponStar5Count > weaponCount
+                || permanentCount < 0 || permanentStar5Count < 0
+                || permanentCount > 90 * permanentStar5Count
+                || permanentStar5Count > permanentCount
+                || characterCountWithUp < 0 || characterStar5CountWithUp < 0
+                || characterCountWithUp > 180 * characterStar5CountWithUp
+                || characterStar5CountWithUp > characterCountWithUp
+                || weaponCountWithUp < 0 || weaponStar5CountWithUp < 0
+                || weaponCountWithUp > 160 * weaponStar5CountWithUp
+                || weaponStar5CountWithUp > weaponCountWithUp)
+            {
+                throw new Exception("请填写正确的数字");
+            }
 
-		for (int i = 0; i < star5Count; i++)
-		{
-			ComputeMethod.IterateDensity(wishType, ref den, i + 1);
-			progressPercent += (double)60 / totalCount;
-			StateHasChanged();
-			await Task.Delay(10);
-		}
+            isError = false;
+            isComputing = true;
+            isComputeFinished = false;
+            StateHasChanged();
+            await Task.Delay(10);
 
-		var dis = ComputeMethod.GetDistribution(den);
+            var total = characterStar5Count + weaponStar5Count + permanentStar5Count + characterStar5CountWithUp + weaponStar5CountWithUp;
+            characterResult = await GetBloodResult(0, characterStar5Count, characterCount, total);
+            weaponResult = await GetBloodResult(1, weaponStar5Count, weaponCount, total);
+            permanentResult = await GetBloodResult(0, permanentStar5Count, permanentCount, total);
+            characterResultWithUp = await GetBloodResultWithUp(0, characterStar5CountWithUp, characterCountWithUp, total);
+            weaponResultWithUp = await GetBloodResultWithUp(1, weaponStar5CountWithUp, weaponCountWithUp, total);
 
-		for (int i = 0; i < den.Length; i++)
-		{
-			list.Add(new PointEx
-			{
-				X = ((double)(i + 1) / star5Count).ToString("F3"),
-				Y = dis[i],
-				Type = "分布函数"
-			});
-			if ((i + 1) % n == 0)
-			{
-				progressPercent += (double)40 / totalCount;
-				StateHasChanged();
-				await Task.Delay(10);
-			}
-		}
+            isComputing = false;
+            isComputeFinished = true;
+            StateHasChanged();
+            progressPercent = 0;
+            await Task.Delay(10);
 
+            await chart1.ChangeData(characterResult.PlotData);
+            await chart2.ChangeData(weaponResult.PlotData);
+            await chart3.ChangeData(permanentResult.PlotData);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            isError = true;
+            isComputing = false;
+            isComputeFinished = false;
+            progressPercent = 0;
+        }
 
-		for (int i = 0; i < den.Length; i++)
-		{
-			list.Add(new PointEx
-			{
-				X = ((double)(i + 1) / star5Count).ToString("F3"),
-				Y = den[i],
-				Type = "概率密度"
-			});
-			if ((i + 1) % n == 0)
-			{
-				progressPercent += (double)40 / totalCount;
-				StateHasChanged();
-				await Task.Delay(10);
-			}
-		}
+    }
 
 
-		var max = den.Max();
-		for (int i = 0; i < den.Length; i++)
-		{
-			list.Add(new PointEx
-			{
-				X = ((double)(i + 1) / star5Count).ToString("F3"),
-				Y = den[i] / max,
-				Type = "归一化概率密度"
-			});
-			if ((i + 1) % n == 0)
-			{
-				progressPercent += (double)40 / totalCount;
-				StateHasChanged();
-				await Task.Delay(10);
-			}
-		}
+    private async Task<BloodResult> GetBloodResult(int wishType, int star5Count, int wishTypeCount, int totalCount)
+    {
+        var result = new BloodResult
+        {
+            TotalCount = wishTypeCount,
+            Star5Count = star5Count
+        };
+        if (star5Count == 0)
+        {
+            star5Count = 1;
+        }
+        int n = 0;
+        if (wishType == 0)
+        {
+            n = 90;
+        }
+        else
+        {
+            n = 80;
+        }
+        double[] den = new double[n * star5Count];
+        List<PointEx> list = new(n * star5Count);
 
-		result.PlotData = list.ToArray();
-		if (wishTypeCount == 0)
-		{
-			result.RatioRank = dis[0];
-		}
-		else
-		{
-			result.RatioRank = dis[wishTypeCount - 1];
-		}
-		return result;
-	}
+        for (int i = 0; i < star5Count; i++)
+        {
+            ComputeMethod.IterateDensity(wishType, ref den, i + 1);
+            progressPercent += (double)60 / totalCount;
+            StateHasChanged();
+            await Task.Delay(10);
+        }
+
+        var dis = ComputeMethod.GetDistribution(den);
+
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = dis[i],
+                Type = "分布函数"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i],
+                Type = "概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+
+        var max = den.Max();
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i] / max,
+                Type = "归一化概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+        result.PlotData = list.ToArray();
+        if (wishTypeCount == 0)
+        {
+            result.RatioRank = dis[0];
+        }
+        else
+        {
+            result.RatioRank = dis[wishTypeCount - 1];
+        }
+        return result;
+    }
+
+    private async Task<BloodResult> GetBloodResultWithUp(int wishType, int star5Count, int wishTypeCount, int totalCount)
+    {
+        var result = new BloodResult
+        {
+            TotalCount = wishTypeCount,
+            Star5Count = star5Count
+        };
+        if (star5Count == 0)
+        {
+            star5Count = 1;
+        }
+        int n = 0;
+        if (wishType == 0)
+        {
+            n = 180;
+        }
+        else
+        {
+            n = 160;
+        }
+        double[] den = new double[n * star5Count];
+        List<PointEx> list = new(n * star5Count);
+
+        for (int i = 0; i < star5Count; i++)
+        {
+            ComputeMethod.IterateDensityWithUp(wishType, ref den, i + 1);
+            progressPercent += (double)60 / totalCount;
+            StateHasChanged();
+            await Task.Delay(10);
+        }
+
+        var dis = ComputeMethod.GetDistribution(den);
+
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = dis[i],
+                Type = "分布函数"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i],
+                Type = "概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+
+        var max = den.Max();
+        for (int i = 0; i < den.Length; i++)
+        {
+            list.Add(new PointEx
+            {
+                X = ((double)(i + 1) / star5Count).ToString("F3"),
+                Y = den[i] / max,
+                Type = "归一化概率密度"
+            });
+            if ((i + 1) % n == 0)
+            {
+                progressPercent += (double)40 / totalCount;
+                StateHasChanged();
+                await Task.Delay(10);
+            }
+        }
+
+        result.PlotData = list.ToArray();
+        if (wishTypeCount == 0)
+        {
+            result.RatioRank = dis[0];
+        }
+        else
+        {
+            result.RatioRank = dis[wishTypeCount - 1];
+        }
+        return result;
+    }
 }
